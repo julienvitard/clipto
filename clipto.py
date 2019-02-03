@@ -8,26 +8,31 @@ from __future__ import print_function
 
 import sys
 
-
-class StopProcess(Exception):
-    pass
-
-
 try:
     import tkinter
-    from tkinter import messagebox
 except ImportError:
     import Tkinter as tkinter
-    import tkMessageBox as messagebox
 
 
-class CliptoPlugin(object):
-    """CliptoPlugin
+class StopProcess(Exception):
+    """Exception to stop execution process
+    """
+
+
+class CliptoPlugin:
+    """CliptoPlugin interface
     """
     name = None
 
     def process(self, content):
-        raise NotImplemented
+        """Process content of clipboard
+
+        :params any content: clipboard content
+        :rtype: NoneType
+        :return: None
+        :raises StopProcess: to break the process execution list
+        """
+        raise NotImplementedError
 
 
 class EchoPlugin(CliptoPlugin):
@@ -36,20 +41,26 @@ class EchoPlugin(CliptoPlugin):
     name = "Echo"
 
     def process(self, content):
+        """Echoes the content of clipboard
+        """
         if content:
             print(content)
 
 
 class Clipboard:
+    """Clipboard main class
+    """
     def __init__(self):
-        self.tk = tkinter.Tk()
-        self.tk.withdraw()
+        self.tkinter = tkinter.Tk()
+        self.tkinter.withdraw()
         self.last_content = ''
         self.registry = []
 
     def watch(self):
+        """Watch clipboard content
+        """
         try:
-            content = self.tk.clipboard_get()
+            content = self.tkinter.clipboard_get()
             if content != self.last_content:
                 self.last_content = content
                 for plugin in self.registry:
@@ -65,12 +76,14 @@ class Clipboard:
             sys.exit()
         except tkinter.TclError:
             pass
-        self.tk.after(100, self.watch)
+        self.tkinter.after(100, self.watch)
 
     def run(self):
+        """Exexcute main loop
+        """
         try:
-            self.tk.after(100, self.watch)
-            self.tk.mainloop()
+            self.tkinter.after(100, self.watch)
+            self.tkinter.mainloop()
         except KeyboardInterrupt:
             print("\b\bBye ;-)")
         except Exception:
